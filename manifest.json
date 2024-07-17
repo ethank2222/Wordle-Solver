@@ -1,0 +1,16 @@
+{
+    "name": "Wordle Solver",
+    "description": "Solves Wordle",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": ["scripting", "activeTab"],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "icons": {
+        "16": "/images/icon.png",
+        "32": "/images/icon.png",
+        "48": "/images/icon.png",
+        "128": "/images/icon.png"
+    }
+}

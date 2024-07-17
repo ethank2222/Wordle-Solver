@@ -1,0 +1,61 @@
+/*Colors
+Bright Blue: #0c3bfe
+Desaturated Blue-1: #485fc2;
+Desaturated Blue-2: #606ea9;
+
+*/
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+*{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: 14px;
+}
+body{
+    padding: 10px;
+    width: 400px;
+}
+h1{
+    text-align: center;
+    font-size: 20px;
+}
+.link{
+    color: #54b3b8;
+    cursor: pointer;
+    text-decoration: none;
+}
+#go{
+    border: none;
+    padding: 10px 20px;
+    background-color: #606ea9;
+    color: white;
+    border-radius: 5px;
+    transition: .2s;
+}
+#go:hover{
+    cursor: pointer;
+    background-color: #485fc2;
+}
+#go:disabled:hover, #go:disabled{
+    background-color:#ccc;
+    cursor: not-allowed;
+}
+#inputfile{
+    margin: 10px 0px;
+}
+li{
+    margin: 10px 0px;
+    text-align: left;
+}
+#output{
+    display: none;
+}
