@@ -26,6 +26,21 @@ var dictionary = {
     'J':0.10,
     'Z':0.07
 }
+var container = document.createElement("div");
+container.style.width = "300px";
+container.style.height = "200px";
+container.style.scrollY = "scroll";
+container.style.position = "fixed";
+container.style.backgroundColor = "#d2d2d2";
+document.body.appendChild(container);
+for (var i = 0; i < 5; i++){
+    var paragraph = document.createElement("p");
+    paragraph.style.margin = "20px";
+    paragraph.className = "more-info";
+    paragraph.innerText = (i+1) + ") ";
+    container.appendChild(paragraph);
+}
+
 var choices = [];
 var numGuesses = 0;
 autofill();
@@ -46,13 +61,11 @@ function autofill(){
         }
     }
     if (numGuesses == 0){
-        next = "crane";
+        next = "salet";
     }
     else{
         
     }
-    console.log(choices);
-    console.log(next);
     document.querySelectorAll("[data-key='" + next.substring(0,1) + "']")[0].click();
     document.querySelectorAll("[data-key='" + next.substring(1,2) + "']")[0].click();
     document.querySelectorAll("[data-key='" + next.substring(2,3) + "']")[0].click();
@@ -70,8 +83,20 @@ function guess(){
         var row = document.getElementsByClassName("Row-module_row__pwpBq")[(numGuesses-1)];
         var iter = row.childNodes[i].firstChild;
         if (iter.getAttribute("data-state") == "absent"){
+            var count = 0;
+            for (var k = i; k < 5; k++){
+                if (iter.innerText.toLowerCase() == row.childNodes[k].firstChild.innerText.toLowerCase()){
+                    count++;
+                }
+            }
             for (var j = 0; j < choices.length; j++){
-                if (choices[j].indexOf(iter.innerText.toLowerCase()) != -1){
+                var count2 = 0
+                for (var k = 0; k < 5; k++){
+                    if (iter.innerText.toLowerCase() == choices[j].substring(k,k+1)){
+                        count2++;
+                    }
+                }
+                if (count2 >= count){
                     choices.splice(j,1);
                     j--;
                 }
@@ -94,5 +119,7 @@ function guess(){
             }
         }
     }
+    document.getElementsByClassName("more-info")[numGuesses-1].innerText = numGuesses + ") " + choices.length + " possibilities left"; 
+    
     autofill();
 }
