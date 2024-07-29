@@ -43,6 +43,7 @@ for (var i = 0; i < 5; i++){
 
 var choices = [];
 var numGuesses = 0;
+var letters = [];
 autofill();
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     choices = message;
@@ -54,6 +55,11 @@ function autofill(){
         var mycount = 0;
         for (var j = 0; j < 5; j++){
             mycount += dictionary[choices[i].substring(j,j+1).toUpperCase()];
+            for (k = j; k < 5; k++){
+                if (choices[i].substring(j,j+1).toLowerCase() == choices[i].substring(k,k+1).toLowerCase()){
+                    mycount -= 5;
+                }
+            }
         }
         if (mycount > score){
             next = choices[i];
@@ -62,9 +68,6 @@ function autofill(){
     }
     if (numGuesses == 0){
         next = "salet";
-    }
-    else{
-        
     }
     document.querySelectorAll("[data-key='" + next.substring(0,1) + "']")[0].click();
     document.querySelectorAll("[data-key='" + next.substring(1,2) + "']")[0].click();
@@ -84,23 +87,29 @@ function guess(){
         var iter = row.childNodes[i].firstChild;
         if (iter.getAttribute("data-state") == "absent"){
             var count = 0;
-            for (var k = i; k < 5; k++){
+            for (var k = 0; k < 5; k++){
                 if (iter.innerText.toLowerCase() == row.childNodes[k].firstChild.innerText.toLowerCase()){
                     count++;
                 }
             }
+            for (var k = 0; k < letters.length; k++){
+                if (letters[k] == iter.innerText.toLowerCase()){
+                    count--;
+                }
+            }
             for (var j = 0; j < choices.length; j++){
-                var count2 = 0
+                var count2 = 0;
                 for (var k = 0; k < 5; k++){
                     if (iter.innerText.toLowerCase() == choices[j].substring(k,k+1)){
                         count2++;
                     }
                 }
-                if (count2 >= count){
+                if (count2 >= count || choices[j].substring(i,i+1) == iter.innerText.toLowerCase()){
                     choices.splice(j,1);
                     j--;
                 }
             }
+            letters.push(iter.innerText.toLowerCase());
         }
         else if (iter.getAttribute("data-state") == "present"){
             for (var j = 0; j < choices.length; j++){
@@ -119,7 +128,11 @@ function guess(){
             }
         }
     }
-    document.getElementsByClassName("more-info")[numGuesses-1].innerText = numGuesses + ") " + choices.length + " possibilities left"; 
+    document.getElementsByClassName("more-info")[numGuesses-1].innerText = numGuesses + ") " + choices.length + " possibilities left, "; 
     
     autofill();
 }
+/*
+1. Add word to array if not in word
+2. If letter is not in word and is in array, count --
+*/
