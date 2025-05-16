@@ -1,4 +1,4 @@
-var dictionary = {
+let frequency = {
     E: 12.02,
     T: 9.1,
     A: 8.12,
@@ -27,15 +27,29 @@ var dictionary = {
     Z: 0.07,
 };
 
-var container = document.createElement("div");
+// Calculates the score of a word using the frequency map above
+function calculateScore(word) {
+    let score;
+    for (let j = 0; j < 5; j++) {
+        score += frequency[word[j].toUpperCase()];
+        for (let k = j; k < 5; k++) {
+            if (word[j].toUpperCase() == word[k].toUpperCase()) {
+                score -= 5;
+            }
+        }
+    }
+    return score;
+}
+
+let container = document.createElement("div");
 container.style.width = "300px";
 container.style.height = "200px";
 container.style.scrollY = "scroll";
 container.style.position = "fixed";
 container.style.backgroundColor = "#d2d2d2";
 document.body.appendChild(container);
-for (var i = 0; i < 5; i++) {
-    var paragraph = document.createElement("p");
+for (let i = 0; i < 5; i++) {
+    let paragraph = document.createElement("p");
     paragraph.style.margin = "20px";
     paragraph.className = "more-info";
     paragraph.innerText = i + 1 + ") ";
@@ -48,87 +62,86 @@ async function loadJSON(fileName) {
 
 // Get list of possible answers from data/wordle.json
 loadJSON("data/wordle.json").then((choices) => {
-    var numGuesses = 0;
-    var letters = [];
+    let numGuesses = 0;
+    let letters = [];
 
     function autofill() {
-        var next = choices[0];
-        var score = 0;
-        for (var i = 0; i < choices.length; i++) {
-            var mycount = 0;
-            for (var j = 0; j < 5; j++) {
-                mycount += dictionary[choices[i].substring(j, j + 1).toUpperCase()];
-                for (k = j; k < 5; k++) {
-                    if (choices[i].substring(j, j + 1).toLowerCase() == choices[i].substring(k, k + 1).toLowerCase()) {
-                        mycount -= 5;
-                    }
+        let next = choices[0];
+        if (numGuesses == 0) {
+            // First guess is always "salet"
+            next = "salet";
+        } else {
+            // Get word with the best score
+            let score = 0;
+            for (let choice of choices) {
+                let mycount = calculateScore(choice);
+                if (mycount > score) {
+                    next = choice;
+                    score = mycount;
                 }
             }
-            if (mycount > score) {
-                next = choices[i];
-                score = mycount;
-            }
         }
-        if (numGuesses == 0) {
-            next = "salet";
+
+        // Enter the word
+        for (let i = 0; i < 5; i++) {
+            document.querySelectorAll("[data-key='" + next[i] + "']")[0].click();
         }
-        document.querySelectorAll("[data-key='" + next.substring(0, 1) + "']")[0].click();
-        document.querySelectorAll("[data-key='" + next.substring(1, 2) + "']")[0].click();
-        document.querySelectorAll("[data-key='" + next.substring(2, 3) + "']")[0].click();
-        document.querySelectorAll("[data-key='" + next.substring(3, 4) + "']")[0].click();
-        document.querySelectorAll("[data-key='" + next.substring(4, 5) + "']")[0].click();
         document.querySelectorAll("[data-key='↵']")[0].click();
+
         numGuesses++;
         if (numGuesses < 6) setTimeout(guess, 4000);
     }
 
+    // Reduce number of possible answers given the result of the previous guess
     function guess() {
         if (choices.length == 1) return;
-        for (var i = 0; i < 5; i++) {
-            var row = document.getElementsByClassName("Row-module_row__pwpBq")[numGuesses - 1];
-            var iter = row.childNodes[i].firstChild;
-            if (iter.getAttribute("data-state") == "absent") {
-                var count = 0;
-                for (var k = 0; k < 5; k++) {
-                    if (iter.innerText.toLowerCase() == row.childNodes[k].firstChild.innerText.toLowerCase()) {
+        for (let i = 0; i < 5; i++) {
+            let row = document.getElementsByClassName("Row-module_row__pwpBq")[numGuesses - 1];
+            let currentLetter = row.childNodes[i].firstChild;
+            if (currentLetter.getAttribute("data-state") == "absent") {
+                // This letter is NOT in the answer
+                let absentLetter = currentLetter.innerText.toLowerCase();
+
+                // Count how many times this letter is not included
+                let count = 0;
+                for (let j = 0; j < 5; j++) {
+                    const otherLetter = row.childNodes[j].firstChild.innerText.toLowerCase();
+                    if (otherLetter === absentLetter) {
                         count++;
                     }
                 }
-                for (var k = 0; k < letters.length; k++) {
-                    if (letters[k] == iter.innerText.toLowerCase()) {
+                for (let letter of letters) {
+                    if (letter === absentLetter) {
                         count--;
                     }
                 }
-                for (var j = 0; j < choices.length; j++) {
-                    var count2 = 0;
-                    for (var k = 0; k < 5; k++) {
-                        if (iter.innerText.toLowerCase() == choices[j].substring(k, k + 1)) {
-                            count2++;
+
+                // Filter out choices that contain the absent letter
+                // !NOTE: If a guess contained the same letter twice, but the answer only has the letter once.
+                // !If the letter is present, the second instance is absent
+                // !If the letter is correct, all other instances are absent (even the first one)
+                choices = choices.filter((choice) => {
+                    let choice_count = 0;
+                    for (let letter of choice) {
+                        if (letter === absentLetter) {
+                            choice_count++;
                         }
                     }
-                    if (count2 >= count || choices[j].substring(i, i + 1) == iter.innerText.toLowerCase()) {
-                        choices.splice(j, 1);
-                        j--;
-                    }
-                }
-                letters.push(iter.innerText.toLowerCase());
-            } else if (iter.getAttribute("data-state") == "present") {
-                for (var j = 0; j < choices.length; j++) {
-                    if (
-                        choices[j].indexOf(iter.innerText.toLowerCase()) == -1 ||
-                        choices[j].substring(i, i + 1) == iter.innerText.toLowerCase()
-                    ) {
-                        choices.splice(j, 1);
-                        j--;
-                    }
-                }
-            } else if (iter.getAttribute("data-state") == "correct") {
-                for (var j = 0; j < choices.length; j++) {
-                    if (choices[j].substring(i, i + 1) != iter.innerText.toLowerCase()) {
-                        choices.splice(j, 1);
-                        j--;
-                    }
-                }
+                    return choice_count < count && choice[i] !== absentLetter;
+                });
+                letters.push(currentLetter.innerText.toLowerCase());
+            } else if (currentLetter.getAttribute("data-state") == "present") {
+                // This letter is in the answer, but in another spot
+                const presentLetter = currentLetter.innerText.toLowerCase();
+
+                // Filter out choices that contain the present letter in the wrong spot
+                choices = choices.filter((choice) => choice.includes(presentLetter) && choice[i] !== presentLetter);
+            } else if (currentLetter.getAttribute("data-state") == "correct") {
+                // This letter is in the answer, and is in the right spot
+                const correctLetter = currentLetter.innerText.toLowerCase();
+
+                // Filter out choice that don't contain this letter in the same spot
+                choices = choices.filter((choice) => choice[i] === correctLetter);
             }
         }
         document.getElementsByClassName("more-info")[numGuesses - 1].innerText =
