@@ -1,0 +1,34 @@
+:root {
+    --color-present: #c9b458;
+    --color-correct: #6aaa64;
+    --color-absent: #787c7e;
+    --foreground: #fff;
+}
+
+body {
+    margin: 20px;
+    width: 320px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 36px;
+}
+
+button#go {
+    border: none;
+    padding: 10px 20px;
+    background-color: var(--color-present);
+    color: var(--foreground);
+    transition: 0.2s;
+
+    &:hover {
+        cursor: pointer;
+        background-color: var(--color-correct);
+    }
+
+    &:disabled {
+        background-color: var(--color-absent);
+        cursor: not-allowed;
+    }
+}

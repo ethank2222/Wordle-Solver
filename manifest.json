@@ -5,12 +5,18 @@
     "manifest_version": 3,
     "permissions": ["scripting", "activeTab"],
     "action": {
-        "default_popup": "popup.html"
+        "default_popup": "popup/popup.html"
     },
     "icons": {
         "16": "/images/icon.png",
         "32": "/images/icon.png",
         "48": "/images/icon.png",
         "128": "/images/icon.png"
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["data/*.json"],
+            "matches": []
+        }
+    ]
 }
